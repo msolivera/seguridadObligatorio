@@ -12,6 +12,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Seguridad.Data;
+using Microsoft.Extensions.FileProviders;
+using System.IO;
 
 namespace Seguridad
 {
@@ -40,6 +42,13 @@ namespace Seguridad
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseFileServer(new FileServerOptions {            
+                FileProvider = new PhysicalFileProvider(
+                    Path.Combine(Directory.GetCurrentDirectory(),"StaticFile")),
+                RequestPath = "/StaticFile",
+                EnableDefaultFiles = true            
+            });
 
             app.UseHttpsRedirection();
 

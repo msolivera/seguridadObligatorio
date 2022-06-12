@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Iniciar Sesión</title>
+    <link rel="stylesheet" href="../assets/css/style.css" />
+    <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+  </head>
+  <body>
+    <div class="login-reg-panel">
+      <div class="login-info-box">
+        <h2>Ya tienes una cuenta?</h2>
+        <p>Click aquí para iniciar sesión!</p>
+        <label id="label-register" for="log-reg-show">Login</label>
+        <input
+          type="radio"
+          name="active-log-panel"
+          id="log-reg-show"
+          checked="checked"
+        />
+      </div>
+
+      <div class="register-info-box">
+        <h2>No tienes una Cuenta?</h2>
+        <p>Crea tu nueva cuenta aquí!</p>
+        <label id="label-login" for="log-login-show">Registrarme</label>
+        <input type="radio" name="active-log-panel" id="log-login-show" />
+      </div>
+
+      <div class="white-panel">
+        <div class="login-show">
+          <h2>LOGIN</h2>
+          <input
+            type="text"
+            id="username"
+            placeholder="Email"
+            value="eve.holt@reqres.in"
+          />
+          <input
+            type="password"
+            id="password"
+            placeholder="Password"
+            value=""
+          />
+          <input type="button" value="Login" onclick="login()" />
+        </div>
+        <div class="register-show">
+          <h2>REGISTRO</h2>
+          <input
+            type="text"
+            id="usernameRegister"
+            placeholder="Email"
+            value="eve.holt@reqres.in"
+          />
+          <input
+            type="password"
+            id="passwordRegister"
+            placeholder="Password"
+            value="pistol"
+          />
+          <input
+            type="password"
+            id="passwordRegisterRepeat"
+            placeholder="Confirm Password"
+            value="pistol"
+          />
+          <input type="button" value="Registrarme" onclick="register()" />
+        </div>
+      </div>
+    </div>
+
+
+    <script src="../assets/js/controllers/loginController.js"></script>
+  </body>
+</html>
