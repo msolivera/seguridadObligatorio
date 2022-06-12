@@ -30,31 +30,42 @@ function login() {
 
   let camposVacios = validarCamposVacios(email, password);
   let emailOk = validarEmail(email);
+  let passwordSegura = validarPassword(password);
 
   if (camposVacios) {
     alert("Todos los campos son obligatorios");
   } else {
-    if (emailOk) {
-      var data = {
-        email: email,
-        password: password,
-      };
-      //como manejar el error y el success
-      $.ajax({
-        type: "POST",
-        url: "https://reqres.in/api/login",
-        data: data,
-        success: function (response) {
-          console.log(response);
-          location.href = "Guest/dashboardGuest.html";
-        },
-      });
+    if (passwordSegura) {
+      if (emailOk) {
+        var data = {
+          email: email,
+          password: password,
+        };
+        //como manejar el error y el success
+        $.ajax({
+          type: "POST",
+          url: "https://reqres.in/api/login",
+          data: data,
+          success: function (response) {
+            console.log(response);
+          },
+          statusCode: {
+            404: function () {
+              alert("Ha ocurrido un error al intentar inicar sesión");
+            },
+            200: function () {
+              window.location = "Guest/dashboardGuest.html";
+            },
+          },
+        });
+      } else {
+        alert("El email no es valido");
+      }
     } else {
-      alert("El email no es valido");
+      alert("La contraseña debe tener al menos 8 caracteres");
     }
   }
 }
-
 function register() {
   var email = document.getElementById("usernameRegister").value;
   var passwordRegister = document.getElementById("passwordRegister").value;
@@ -64,25 +75,35 @@ function register() {
 
   let passwordOk = compararPassword(passwordRegister, passwordRegisterRepeat);
   let emailOk = validarEmail(email);
+  let passwordSegura = validarPassword(passwordRegister);
 
   if (emailOk) {
-    if (passwordOk) {
-      var data = {
-        email: email,
-        password: passwordOk,
-      };
-      //como manejar el error y el success
-      $.ajax({
-        type: "POST",
-        url: "https://reqres.in/api/register",
-        data: data,
-        success: function (response) {
-          //console.log(response);
-          location.href = "login.html";
-        },
-      });
+    if (passwordSegura) {
+      if (passwordOk) {
+        var data = {
+          email: email,
+          password: passwordOk,
+        };
+        //como manejar el error y el success
+        $.ajax({
+          type: "POST",
+          url: "https://reqres.in/api/register",
+          data: data,
+          success: function (response) {
+            console.log(response);
+            //window.location = "login.html";
+          },
+          error: function (error) {
+            console.log(error);
+          },
+        });
+      } else {
+        alert("Las contraseñas no coinciden");
+      }
     } else {
-      alert("Las contraseñas no coinciden");
+      alert(
+        "La contraseña debe tener al entre 8 y 16 caracteres, al menos un dígito,al menos una minúscula,al menos una mayúscula y al menos un caracter no alfanumérico."
+      );
     }
   } else {
     alert("El email no es valido");
@@ -110,4 +131,18 @@ function validarCamposVacios(email, password) {
     return true;
   }
   return false;
+}
+
+function validarPassword(password) {
+  /*La contraseña debe tener al menos 8 caracteres, 
+  al menos un dígito, 
+  al menos una minúscula, 
+  al menos una mayúscula 
+  y al menos un caracter no alfanumérico.*/
+  var regex =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!%*?&])([A-Za-z\d$@$!%*?&]|[^ ]){8,}$/;
+  if (!regex.test(password)) {
+    return false;
+  }
+  return true;
 }
