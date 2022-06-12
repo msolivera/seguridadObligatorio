@@ -27,20 +27,32 @@ $('.login-reg-panel input[type="radio"]').on("change", function () {
 function login() {
   var email = document.getElementById("username").value;
   var password = document.getElementById("password").value;
-  var data = {
-    email: email,
-    password: password,
-  };
-  //como manejar el error y el success
-  $.ajax({
-    type: "POST",
-    url: "https://reqres.in/api/login",
-    data: data,
-    success: function (response) {
-      console.log(response);
-      location.href = "Guest/dashboardGuest.html";
-    },
-  });
+
+  let camposVacios = validarCamposVacios(email, password);
+  let emailOk = validarEmail(email);
+
+  if (camposVacios) {
+    alert("Todos los campos son obligatorios");
+  } else {
+    if (emailOk) {
+      var data = {
+        email: email,
+        password: password,
+      };
+      //como manejar el error y el success
+      $.ajax({
+        type: "POST",
+        url: "https://reqres.in/api/login",
+        data: data,
+        success: function (response) {
+          console.log(response);
+          location.href = "Guest/dashboardGuest.html";
+        },
+      });
+    } else {
+      alert("El email no es valido");
+    }
+  }
 }
 
 function register() {
@@ -50,7 +62,7 @@ function register() {
     "passwordRegisterRepeat"
   ).value;
 
-  let passwordOk = validarPassword(passwordRegister, passwordRegisterRepeat);
+  let passwordOk = compararPassword(passwordRegister, passwordRegisterRepeat);
   let emailOk = validarEmail(email);
 
   if (emailOk) {
@@ -77,7 +89,7 @@ function register() {
   }
 }
 
-function validarPassword(password, passwordRepeat) {
+function compararPassword(password, passwordRepeat) {
   if (password != passwordRepeat) {
     return false;
   }
@@ -91,4 +103,11 @@ function validarEmail(email) {
     return false;
   }
   return true;
+}
+
+function validarCamposVacios(email, password) {
+  if (email == "" || password == "") {
+    return true;
+  }
+  return false;
 }
