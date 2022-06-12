@@ -1,4 +1,5 @@
-﻿using JwtWebApiTutorial.Models;
+﻿using JwtWebApiTutorial.Data;
+using JwtWebApiTutorial.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -16,11 +17,14 @@ namespace JwtWebApiTutorial.Controllers
         public static User user = new User();
         private readonly IConfiguration _configuration;
         private readonly IUserService _userService;
+        //contexto de la db
+        private readonly JwtWebApiTutorialContext _context;
 
-        public AuthController(IConfiguration configuration, IUserService userService)
+        public AuthController(IConfiguration configuration, IUserService userService, JwtWebApiTutorialContext context)
         {
             _configuration = configuration;
             _userService = userService;
+            _context = context;
         }
 
         [HttpGet, Authorize]
@@ -33,11 +37,18 @@ namespace JwtWebApiTutorial.Controllers
         [HttpPost("register")]
         public async Task<ActionResult<User>> Register(UserDto request)
         {
+            if (_context.User == null)
+            {
+                return Problem("Entity set 'JwtWebApiTutorialContext.User'  is null.");
+            }
             CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
 
             user.Username = request.Username;
             user.PasswordHash = passwordHash;
             user.PasswordSalt = passwordSalt;
+
+            _context.User.Add(user);
+            await _context.SaveChangesAsync();
 
             return Ok(user);
         }

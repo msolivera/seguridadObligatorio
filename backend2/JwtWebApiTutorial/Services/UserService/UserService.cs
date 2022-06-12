@@ -16,6 +16,7 @@ namespace JwtWebApiTutorial.Services.UserService
             var result = string.Empty;
             if (_httpContextAccessor.HttpContext != null)
             {
+                //aca es donde se fija en el token que nos esta pasando
                 result = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.Name);
             }
             return result;
