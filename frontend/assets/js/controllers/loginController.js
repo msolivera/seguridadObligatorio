@@ -38,6 +38,7 @@ function login() {
     data: data,
     success: function (response) {
       console.log(response);
+      location.href = "Guest/dashboardGuest.html";
     },
   });
 }
@@ -64,7 +65,8 @@ function register() {
         url: "https://reqres.in/api/register",
         data: data,
         success: function (response) {
-          console.log(response);
+          //console.log(response);
+          location.href = "login.html";
         },
       });
     } else {
