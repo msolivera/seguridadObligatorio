@@ -21,30 +21,30 @@ namespace Seguridad.Controllers
             _context = context;
         }
 
-        [HttpPost("login")]
-        public async Task<ActionResult<string>> Login(User request)
-        {
-            User usu = _context.User.Where(u => u.Mail == request.Mail).FirstOrDefault();
-            if (usu != null)
-            {
+        //[HttpPost("login")]
+        //public async Task<ActionResult<string>> Login(User request)
+        //{
+        //    User usu = _context.User.Where(u => u.Mail == request.Mail).FirstOrDefault();
+        //    if (usu != null)
+        //    {
 
-                //if (user.Username != request.Username)
-                //{
-                //    return BadRequest("User not found.");
-                //}
+        //        //if (user.Username != request.Username)
+        //        //{
+        //        //    return BadRequest("User not found.");
+        //        //}
 
-                //if (!VerifyPasswordHash(request.Password, user.PasswordHash, user.PasswordSalt))
-                //{
-                //    return BadRequest("Wrong password.");
-                //}
+        //        //if (!VerifyPasswordHash(request.Password, user.PasswordHash, user.PasswordSalt))
+        //        //{
+        //        //    return BadRequest("Wrong password.");
+        //        //}
 
-                //string token = CreateToken(user);
+        //        //string token = CreateToken(user);
 
-                //var refreshToken = GenerateRefreshToken();
-                //SetRefreshToken(refreshToken);
+        //        //var refreshToken = GenerateRefreshToken();
+        //        //SetRefreshToken(refreshToken);
 
-                //return Ok(token);
-            }
-        }
+        //        //return Ok(token);
+        //    }
+        //}
     }
 }
