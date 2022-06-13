@@ -42,6 +42,10 @@ namespace Seguridad
             {
                 app.UseDeveloperExceptionPage();
             }
+            app.UseCors(x => x
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader());
 
             app.UseFileServer(new FileServerOptions {            
                 FileProvider = new PhysicalFileProvider(
@@ -60,6 +64,8 @@ namespace Seguridad
             {
                 endpoints.MapControllers();
             });
+            
+
         }
     }
 }
