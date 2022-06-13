@@ -42,7 +42,7 @@ function login() {
           password: password,
         };
         //como manejar el error y el success
-        $.ajax({
+        /*$.ajax({
           type: "POST",
           url: "https://reqres.in/api/login",
           data: data,
@@ -57,6 +57,21 @@ function login() {
               window.location = "Guest/dashboardGuest.html";
             },
           },
+        });*/
+        $.ajax({
+          type: "GET",
+          url: "https://localhost:44347/api/Users",
+          success: function (response) {
+            console.log(response);
+          },
+          /*statusCode: {
+            404: function () {
+              alert("Ha ocurrido un error al intentar inicar sesión");
+            },
+            200: function () {
+              window.location = "Guest/dashboardGuest.html";
+            },
+          },*/
         });
       } else {
         alert("El email no es valido");

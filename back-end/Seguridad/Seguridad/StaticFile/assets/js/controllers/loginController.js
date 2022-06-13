@@ -25,46 +25,61 @@ $('.login-reg-panel input[type="radio"]').on("change", function () {
 
 //funciones de login
 function login() {
-  var email = document.getElementById("username").value;
-  var password = document.getElementById("password").value;
+    var email = document.getElementById("username").value;
+    var password = document.getElementById("password").value;
 
-  let camposVacios = validarCamposVacios(email, password);
-  let emailOk = validarEmail(email);
-  let passwordSegura = validarPassword(password);
+    let camposVacios = validarCamposVacios(email, password);
+    let emailOk = validarEmail(email);
+    let passwordSegura = validarPassword(password);
 
-  if (camposVacios) {
-    alert("Todos los campos son obligatorios");
-  } else {
-    if (passwordSegura) {
-      if (emailOk) {
-        var data = {
-          email: email,
-          password: password,
-        };
-        //como manejar el error y el success
-        $.ajax({
-          type: "POST",
-          url: "https://reqres.in/api/login",
-          data: data,
-          success: function (response) {
-            console.log(response);
-          },
-          statusCode: {
-            404: function () {
-              alert("Ha ocurrido un error al intentar inicar sesión");
-            },
-            200: function () {
-              window.location = "Guest/dashboardGuest.html";
-            },
-          },
-        });
-      } else {
-        alert("El email no es valido");
-      }
+    if (camposVacios) {
+        alert("Todos los campos son obligatorios");
     } else {
-      alert("La contraseña debe tener al menos 8 caracteres");
+        if (passwordSegura) {
+            if (emailOk) {
+                var data = {
+                    email: email,
+                    password: password,
+                };
+                //como manejar el error y el success
+                /*$.ajax({
+                  type: "POST",
+                  url: "https://reqres.in/api/login",
+                  data: data,
+                  success: function (response) {
+                    console.log(response);
+                  },
+                  statusCode: {
+                    404: function () {
+                      alert("Ha ocurrido un error al intentar inicar sesión");
+                    },
+                    200: function () {
+                      window.location = "Guest/dashboardGuest.html";
+                    },
+                  },
+                });*/
+                $.ajax({
+                    type: "GET",
+                    url: "https://localhost:44347/api/Users",
+                    success: function (response) {
+                        console.log(response);
+                    },
+                    /*statusCode: {
+                      404: function () {
+                        alert("Ha ocurrido un error al intentar inicar sesión");
+                      },
+                      200: function () {
+                        window.location = "Guest/dashboardGuest.html";
+                      },
+                    },*/
+                });
+            } else {
+                alert("El email no es valido");
+            }
+        } else {
+            alert("La contraseña debe tener al menos 8 caracteres");
+        }
     }
-  }
 }
 function register() {
   var email = document.getElementById("usernameRegister").value;
