@@ -19,8 +19,8 @@ function controlTokenExpirado() {
 }
 
 function cerrarSesion() {
-  //localStorage.clear();
-  //window.location = "login.html";
+  localStorage.clear();
+  window.location = "../login.html"; 
 }
 
 function parsearJwt(token) {
