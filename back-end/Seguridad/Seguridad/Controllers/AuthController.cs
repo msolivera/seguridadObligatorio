@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Seguridad.Data;
@@ -32,40 +33,65 @@ namespace Seguridad.Controllers
         public async Task<ActionResult<SecurityUser>> Register(UserDto request)
         {
             CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
-            user.Username = request.Username;
-            user.PasswordHash = passwordHash;
-            user.PasswordSalt = passwordSalt;
 
-            return Ok(user);
+            //Verifico la existencia del usuario.
+            SecurityUser securityUser = _context.SecurityUser.Where(u => u.Username == request.Username).FirstOrDefault();
+            //Si existe lo rechazo.
+            if (securityUser != null)
+            {                
+                return BadRequest("User already exists.");
+            }
+            else
+            { 
+                //Si no existe lo creo.
+                securityUser = new SecurityUser();
+                securityUser.Id = Guid.NewGuid().ToString();
+                securityUser.Username = request.Username;                
+                securityUser.PasswordHash = passwordHash;
+                securityUser.PasswordSalt = passwordSalt;
+                //Por defecto siempre se crea en el rol de usuario.
+                securityUser.RoleId = "6B4F3E3F-5C96-495B-A5EA-0C5289E7C0C4";
+                _context.SecurityUser.Add(securityUser);
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateException)
+                {                    
+                    throw;
+                }
+                return Ok(securityUser);
+            }            
         }
 
         [HttpPost("login")]
         public async Task<ActionResult<string>> Login(UserDto request)
         {
-            
-
-            User usu = _context.User.Where(u => u.Mail == request.Username).FirstOrDefault();
-
-            if (user.Username != request.Username)
+            //Busco el usuario en la Base de Datos
+            SecurityUser securityUser = _context.SecurityUser.Where(u => u.Username == request.Username).FirstOrDefault();
+            //Se verifica la existencia
+            if (securityUser.Username != request.Username)
             {
                 return BadRequest("User not found.");
             }
-            if (!VerifyPasswordHash(request.Password, user.PasswordHash, user.PasswordSalt)) 
+            //Se verifica la contraseña
+            if (!VerifyPasswordHash(request.Password, securityUser.PasswordHash, securityUser.PasswordSalt)) 
             {
                 return BadRequest("Wrong password.");
             }
-
-            string token = CreateToken(user);
+            //Obtengo el rol del usuario.
+            Role userRole = _context.Role.Where(u => u.Id == securityUser.RoleId).FirstOrDefault();
+            //Creo el JWT
+            string token = CreateToken(securityUser, userRole);
             return Ok(token);
         }
 
-        private string CreateToken (SecurityUser user)
-        {
-            //Agregar Rol a manopla
-            //new Claim(ClaimTypes.Role, user.User.Role)
+        private string CreateToken (SecurityUser user, Role userRole)
+        {            
             List<Claim> claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, user.Username)
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Role, userRole.Name)
             };
 
             var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(
