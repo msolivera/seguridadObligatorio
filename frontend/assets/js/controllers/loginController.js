@@ -23,9 +23,9 @@ $('.login-reg-panel input[type="radio"]').on("change", function () {
   }
 });
 
-//funciones de login
+//funcion de login
 function login() {
-  var email = document.getElementById("username").value;
+  var email = document.getElementById("email").value;
   var password = document.getElementById("password").value;
 
   let camposVacios = validarCamposVacios(email, password);
@@ -41,40 +41,37 @@ function login() {
           email: email,
           password: password,
         };
-        //como manejar el error y el success
-        /*$.ajax({
+        $.ajax({
           type: "POST",
-          url: "https://reqres.in/api/login",
+          url: "https://localhost:44347/api/Login",
           data: data,
           success: function (response) {
-            console.log(response);
+            //var tokenInfo = parsearJwt(response.token);
+            var tokenInfoexp = parsearJwt(
+              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2wiOiJhZG1pbiIsInVzZXJuYW1lIjoibWljYUBtYWlsLmNvbSIsImV4cCI6MTY1NTA3MTUxNn0.KXWBRhnKpyGhdEU8e739bl4GeTGqeui9cLVdmuEi3Mc"
+            );
+            localStorage.setItem("token", response.token);
+            redireccionarUsuario(tokenInfo.rol);
           },
-          statusCode: {
-            404: function () {
-              alert("Ha ocurrido un error al intentar inicar sesión");
-            },
-            200: function () {
-              window.location = "Guest/dashboardGuest.html";
-            },
+          error: function (error) {
+            console.log("Error" + error);
+
+            //todo esto tiene que ir en el success
+            var tokenInfo = parsearJwt(
+              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2wiOiJhZG1pbiIsInVzZXJuYW1lIjoibWljYUBtYWlsLmNvbSIsImV4cCI6MTY4NjY5MzkxNn0.jzq_W8psx7CsOLk_HaScDQPKAjlZznQLpqABEfzpIsE"
+            );
+            var tokenUser = parsearJwt(
+              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2wiOiJ1c2VyIiwidXNlcm5hbWUiOiJtaWNhQG1haWwuY29tIiwiZXhwIjoxNjg2NjkzOTE2fQ.wg78fD0b3flNLmx8X1tg6YmQEhRegazO4qdHCkqUk44"
+            );
+            localStorage.setItem(
+              "token",
+              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2wiOiJhZG1pbiIsInVzZXJuYW1lIjoibWljYUBtYWlsLmNvbSIsImV4cCI6MTY4NjY5MzkxNn0.jzq_W8psx7CsOLk_HaScDQPKAjlZznQLpqABEfzpIsE"
+            );
+            redireccionarUsuario(tokenInfo.rol);
           },
-        });*/
-        $.ajax({
-          type: "GET",
-          url: "https://localhost:44347/api/Users",
-          success: function (response) {
-            console.log(response);
-          },
-          /*statusCode: {
-            404: function () {
-              alert("Ha ocurrido un error al intentar inicar sesión");
-            },
-            200: function () {
-              window.location = "Guest/dashboardGuest.html";
-            },
-          },*/
         });
       } else {
-        alert("El email no es valido");
+        alert("Email incorrecto");
       }
     } else {
       alert("La contraseña debe tener al menos 8 caracteres");
@@ -82,7 +79,7 @@ function login() {
   }
 }
 function register() {
-  var email = document.getElementById("usernameRegister").value;
+  var email = document.getElementById("emailRegister").value;
   var passwordRegister = document.getElementById("passwordRegister").value;
   var passwordRegisterRepeat = document.getElementById(
     "passwordRegisterRepeat"
@@ -99,17 +96,17 @@ function register() {
           email: email,
           password: passwordOk,
         };
-        //como manejar el error y el success
         $.ajax({
           type: "POST",
-          url: "https://reqres.in/api/register",
+          url: "https://localhost:44347/api/Register",
           data: data,
           success: function (response) {
+            alert("Usuario registrado correctamente");
             console.log(response);
-            //window.location = "login.html";
+            window.location = "login.html";
           },
           error: function (error) {
-            console.log(error);
+            console.log("Error "+error);
           },
         });
       } else {
@@ -155,9 +152,35 @@ function validarPassword(password) {
   al menos una mayúscula 
   y al menos un caracter no alfanumérico.*/
   var regex =
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!%*?&])([A-Za-z\d$@$!%*?&]|[^ ]){8,}$/;
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!%*?&])([A-Za-z\d$@$!%*?&]|[^ ]){8,20}$/;
   if (!regex.test(password)) {
     return false;
   }
   return true;
+}
+//funcion que recibe un JWT y lo parsea para obtener los datos del usuario
+function parsearJwt(token) {
+  var base64Url = token.split(".")[1];
+  var base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+  var jsonPayload = decodeURIComponent(
+    atob(base64)
+      .split("")
+      .map(function (c) {
+        return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+      })
+      .join("")
+  );
+
+  return JSON.parse(jsonPayload);
+}
+
+//funcion que redirecciona al usuario segun su rol
+function redireccionarUsuario(rol) {
+  if (rol == "admin") {
+    window.location = "Admin/dashboardAdmin.html";
+  } else if (rol == "user") {
+    window.location = "User/dashboardUser.html";
+  } else {
+    window.location = "Guest/dashboardGuest.html";
+  }
 }
