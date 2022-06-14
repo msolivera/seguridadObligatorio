@@ -10,11 +10,14 @@ function controlarUsuarioLogeado() {
     var rol = tokenInfo.rol;
     console.log(rol);
     if (rol != "admin") {
-     //window.location = "login.html";
-      //localStorage.clear();
+      alert("No tiene permisos para acceder a esta página");
+      localStorage.clear();
+      window.location = "../login.html";
+      
     }
-  }else{
-   //window.location = "login.html";
-  //localStorage.clear();
+  } else {
+    alert("No tiene permisos para acceder a esta página");
+    window.location = "../login.html";
+    localStorage.clear();
   }
 }

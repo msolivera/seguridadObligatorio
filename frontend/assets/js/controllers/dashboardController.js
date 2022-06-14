@@ -9,11 +9,13 @@ function controlTokenExpirado() {
     var exp = tokenInfo.exp;
     var now = new Date().getTime() / 1000;
     if (exp < now) {
+      alert("Su sesión ha expirado");
       localStorage.clear();
-      window.location = "login.html";
+      window.location = "../login.html";
     }
   } else {
-    window.location = "login.html";
+    alert("No tiene permisos para acceder a esta página");
+    window.location = "../login.html";
     localStorage.clear();
   }
 }
