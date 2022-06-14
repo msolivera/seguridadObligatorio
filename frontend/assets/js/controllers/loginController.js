@@ -46,10 +46,10 @@ function login() {
           url: "https://localhost:44347/api/Login",
           data: data,
           success: function (response) {
-            //var tokenInfo = parsearJwt(response.token);
-            var tokenInfoexp = parsearJwt(
+            var tokenInfo = parsearJwt(response.token);
+            /*var tokenInfoexp = parsearJwt(
               "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2wiOiJhZG1pbiIsInVzZXJuYW1lIjoibWljYUBtYWlsLmNvbSIsImV4cCI6MTY1NTA3MTUxNn0.KXWBRhnKpyGhdEU8e739bl4GeTGqeui9cLVdmuEi3Mc"
-            );
+            );*/
             localStorage.setItem("token", response.token);
             redireccionarUsuario(tokenInfo.rol);
           },
@@ -57,7 +57,7 @@ function login() {
             console.log("Error" + error);
 
             //todo esto tiene que ir en el success
-            var tokenInfo = parsearJwt(
+            /*var tokenInfo = parsearJwt(
               "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2wiOiJhZG1pbiIsInVzZXJuYW1lIjoibWljYUBtYWlsLmNvbSIsImV4cCI6MTY4NjY5MzkxNn0.jzq_W8psx7CsOLk_HaScDQPKAjlZznQLpqABEfzpIsE"
             );
             var tokenUser = parsearJwt(
@@ -67,7 +67,7 @@ function login() {
               "token",
               "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2wiOiJhZG1pbiIsInVzZXJuYW1lIjoibWljYUBtYWlsLmNvbSIsImV4cCI6MTY4NjY5MzkxNn0.jzq_W8psx7CsOLk_HaScDQPKAjlZznQLpqABEfzpIsE"
             );
-            redireccionarUsuario(tokenInfo.rol);
+            redireccionarUsuario(tokenInfo.rol);*/
           },
         });
       } else {
