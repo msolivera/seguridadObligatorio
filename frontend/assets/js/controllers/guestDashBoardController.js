@@ -9,7 +9,7 @@ $(document).ready(function () {
       var tokenInfo = parsearJwt(token);
       var rol = tokenInfo.rol;
       console.log(rol);
-      if (rol != "Usuario") {
+      if (rol != "Invitado") {
         alert("No tiene permisos para acceder a esta página");
         localStorage.clear();
         window.location = "../login.html";
@@ -21,4 +21,3 @@ $(document).ready(function () {
       localStorage.clear();
     }
   }
-  

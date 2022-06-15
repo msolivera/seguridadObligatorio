@@ -9,7 +9,7 @@ function controlarUsuarioLogeado() {
     var tokenInfo = parsearJwt(token);
     var rol = tokenInfo.rol;
     console.log(rol);
-    if (rol != "admin") {
+    if (rol != "Administrador") {
       alert("No tiene permisos para acceder a esta página");
       localStorage.clear();
       window.location = "../login.html";

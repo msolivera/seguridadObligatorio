@@ -39,3 +39,7 @@ function parsearJwt(token) {
 
   return JSON.parse(jsonPayload);
 }
+
+function redireccionaReseteo(){
+  window.location = "../Security/resetPassword.html";
+}

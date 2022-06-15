@@ -22,10 +22,22 @@ $('.login-reg-panel input[type="radio"]').on("change", function () {
     $(".register-show").removeClass("show-log-panel");
   }
 });
+//definimos constantes para mostrar mensajes de error
+const stringTemplates = {
+  camposObligatorios: "Todos los campos son obligatorios",
+  emailInvalido: "El email no es valido",
+  connectionError: "Error de conexión",
+  registroCorrecto: "Usuario registrado correctamente",
+  registroError: "Error al registrar usuario",
+  captchaError: "Resuelve el captcha",
+  passwordIncorrecta: `La contraseña debe tener mínimo 8 caracteres y estar compuesta por combinaciones de al menos una letra minúscula ("a-z"), mayúscula ("A-Z"), número ("0-9") y al menos un caracter especial`,
+  passwordNoCoinciden: "Las contraseñas no coinciden",
+  errorIniciarSesion: "Error al iniciar sesión",
+  passwordDiferentes: "Contraseña actual y nueva deben ser diferentes",
+};
 
 //funcion de login
 function login() {
-  debugger;
   var email = document.getElementById("email").value;
   var password = document.getElementById("password").value;
 
@@ -34,7 +46,7 @@ function login() {
   let passwordSegura = validarPassword(password);
 
   if (camposVacios) {
-    alert("Todos los campos son obligatorios");
+    alert(stringTemplates.camposObligatorios);
   } else {
     if (passwordSegura) {
       if (emailOk) {
@@ -48,37 +60,30 @@ function login() {
           contentType: "application/json",
           data: JSON.stringify(data),
           dataType: "json",
-          /*success: function (response) {
-            console.log(response.token);
-            /*var tokenInfo = parsearJwt(response);
-            localStorage.setItem("token", response);
-            redireccionarUsuario(tokenInfo.rol);*/
-          /*},*/
-         /* error: function (error) {
-            console.log("Error" + error);
-          },*/
           statusCode: {
-            200: function (response) { //Employee_Company saved now updated
-
-              console.log(response.responseText);
+            200: function (response) {
               var tokenInfo = parsearJwt(response.responseText);
-               redireccionarUsuario(tokenInfo.Role);
-
+              localStorage.setItem("token", response.responseText);
+              redireccionarUsuario(tokenInfo.Role);
             },
             404: function () {
-              console.log("mal")
-            }
-          }
+              console.log(stringTemplates.connectionError);
+            },
+            400: function () {
+              console.log(stringTemplates.errorIniciarSesion);
+            },
+          },
         });
-
       } else {
-        alert("Email incorrecto");
+        alert(stringTemplates.emailInvalido);
       }
     } else {
-      alert("La contraseña debe tener al menos 8 caracteres");
+      alert(stringTemplates.passwordIncorrecta);
     }
   }
 }
+
+//funcion para registrar un usuario
 function register() {
   var email = document.getElementById("emailRegister").value;
   var passwordRegister = document.getElementById("passwordRegister").value;
@@ -87,50 +92,62 @@ function register() {
   ).value;
 
   let passwordOk = compararPassword(passwordRegister, passwordRegisterRepeat);
+  let camposVacios = validarCamposVacios(email, passwordRegister);
   let emailOk = validarEmail(email);
   let passwordSegura = validarPassword(passwordRegister);
 
-  if (emailOk) {
-    if (passwordSegura) {
-      if (passwordOk) {
-        var data = {
-          email: email,
-          password: passwordOk,
-        };
-        $.ajax({
-          type: "POST",
-          url: "https://localhost:44347/api/Register",
-          data: data,
-          success: function (response) {
-            alert("Usuario registrado correctamente");
-            console.log(response);
-            window.location = "login.html";
-          },
-          error: function (error) {
-            console.log("Error " + error);
-          },
-        });
+  if (camposVacios) {
+    alert(stringTemplates.camposObligatorios);
+  } else {
+    if (emailOk) {
+      if (passwordSegura) {
+        if (passwordOk) {
+          var data = {
+            username: email,
+            password: passwordRegister,
+          };
+          $.ajax({
+            type: "POST",
+            url: "https://localhost:44347/api/Auth/register",
+            contentType: "application/json",
+            data: JSON.stringify(data),
+            dataType: "json",
+            statusCode: {
+              200: function (response) {
+                alert(stringTemplates.registroCorrecto);
+                window.location = "login.html";
+              },
+              404: function () {
+                alert(stringTemplates.connectionError);
+              },
+              400: function () {
+                alert(stringTemplates.registroError);
+              },
+            },
+          });
+        } else {
+          alert(stringTemplates.passwordNoCoinciden);
+        }
       } else {
-        alert("Las contraseñas no coinciden");
+        alert(stringTemplates.passwordIncorrecta);
       }
     } else {
-      alert(
-        "La contraseña debe tener al entre 8 y 16 caracteres, al menos un dígito,al menos una minúscula,al menos una mayúscula y al menos un caracter no alfanumérico."
-      );
+      alert(stringTemplates.emailInvalido);
     }
-  } else {
-    alert("El email no es valido");
   }
 }
 
+//funcion que compara las contraseñas, que sean iguales y no vacias
 function compararPassword(password, passwordRepeat) {
-  if (password != passwordRepeat) {
+  if (password === "" || passwordRepeat === "") {
+    return false;
+  } else if (password != passwordRepeat) {
     return false;
   }
   return true;
 }
 
-//funcion validar email
+//funcion validar email de forma general
 function validarEmail(email) {
   var regex = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
   if (!regex.test(email)) {
@@ -139,6 +156,7 @@ function validarEmail(email) {
   return true;
 }
 
+//funcion validar que los campos no pueden ser vacios
 function validarCamposVacios(email, password) {
   if (email == "" || password == "") {
     return true;
@@ -146,12 +164,8 @@ function validarCamposVacios(email, password) {
   return false;
 }
 
+//funcion validar password de forma general
 function validarPassword(password) {
-  /*La contraseña debe tener al menos 8 caracteres, 
-  al menos un dígito, 
-  al menos una minúscula, 
-  al menos una mayúscula 
-  y al menos un caracter no alfanumérico.*/
   var regex =
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!%*?&])([A-Za-z\d$@$!%*?&]|[^ ]){8,20}$/;
   if (!regex.test(password)) {
@@ -159,6 +173,7 @@ function validarPassword(password) {
   }
   return true;
 }
+
 //funcion que recibe un JWT y lo parsea para obtener los datos del usuario
 function parsearJwt(token) {
   var base64Url = token.split(".")[1];
@@ -171,7 +186,6 @@ function parsearJwt(token) {
       })
       .join("")
   );
-
   return JSON.parse(jsonPayload);
 }
 
@@ -180,7 +194,7 @@ function redireccionarUsuario(role) {
   debugger;
   if (role == "Administrador") {
     window.location = "Admin/dashboardAdmin.html";
-  } else if (role == "user") {
+  } else if (role == "Usuario") {
     window.location = "User/dashboardUser.html";
   } else {
     window.location = "Guest/dashboardGuest.html";
