@@ -25,6 +25,7 @@ $('.login-reg-panel input[type="radio"]').on("change", function () {
 
 //funcion de login
 function login() {
+  debugger;
   var email = document.getElementById("email").value;
   var password = document.getElementById("password").value;
 
@@ -38,38 +39,38 @@ function login() {
     if (passwordSegura) {
       if (emailOk) {
         var data = {
-          email: email,
+          username: email,
           password: password,
         };
         $.ajax({
           type: "POST",
-          url: "https://localhost:44347/api/Login",
-          data: data,
-          success: function (response) {
-            var tokenInfo = parsearJwt(response.token);
-            /*var tokenInfoexp = parsearJwt(
-              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2wiOiJhZG1pbiIsInVzZXJuYW1lIjoibWljYUBtYWlsLmNvbSIsImV4cCI6MTY1NTA3MTUxNn0.KXWBRhnKpyGhdEU8e739bl4GeTGqeui9cLVdmuEi3Mc"
-            );*/
-            localStorage.setItem("token", response.token);
-            redireccionarUsuario(tokenInfo.rol);
-          },
-          error: function (error) {
-            console.log("Error" + error);
-
-            //todo esto tiene que ir en el success
-            /*var tokenInfo = parsearJwt(
-              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2wiOiJhZG1pbiIsInVzZXJuYW1lIjoibWljYUBtYWlsLmNvbSIsImV4cCI6MTY4NjY5MzkxNn0.jzq_W8psx7CsOLk_HaScDQPKAjlZznQLpqABEfzpIsE"
-            );
-            var tokenUser = parsearJwt(
-              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2wiOiJ1c2VyIiwidXNlcm5hbWUiOiJtaWNhQG1haWwuY29tIiwiZXhwIjoxNjg2NjkzOTE2fQ.wg78fD0b3flNLmx8X1tg6YmQEhRegazO4qdHCkqUk44"
-            );
-            localStorage.setItem(
-              "token",
-              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2wiOiJhZG1pbiIsInVzZXJuYW1lIjoibWljYUBtYWlsLmNvbSIsImV4cCI6MTY4NjY5MzkxNn0.jzq_W8psx7CsOLk_HaScDQPKAjlZznQLpqABEfzpIsE"
-            );
+          url: "https://localhost:44347/api/Auth/login",
+          contentType: "application/json",
+          data: JSON.stringify(data),
+          dataType: "json",
+          /*success: function (response) {
+            console.log(response.token);
+            /*var tokenInfo = parsearJwt(response);
+            localStorage.setItem("token", response);
             redireccionarUsuario(tokenInfo.rol);*/
-          },
+          /*},*/
+         /* error: function (error) {
+            console.log("Error" + error);
+          },*/
+          statusCode: {
+            200: function (response) { //Employee_Company saved now updated
+
+              console.log(response.responseText);
+              var tokenInfo = parsearJwt(response.responseText);
+               redireccionarUsuario(tokenInfo.Role);
+
+            },
+            404: function () {
+              console.log("mal")
+            }
+          }
         });
+
       } else {
         alert("Email incorrecto");
       }
@@ -106,7 +107,7 @@ function register() {
             window.location = "login.html";
           },
           error: function (error) {
-            console.log("Error "+error);
+            console.log("Error " + error);
           },
         });
       } else {
@@ -175,10 +176,11 @@ function parsearJwt(token) {
 }
 
 //funcion que redirecciona al usuario segun su rol
-function redireccionarUsuario(rol) {
-  if (rol == "admin") {
+function redireccionarUsuario(role) {
+  debugger;
+  if (role == "Administrador") {
     window.location = "Admin/dashboardAdmin.html";
-  } else if (rol == "user") {
+  } else if (role == "user") {
     window.location = "User/dashboardUser.html";
   } else {
     window.location = "Guest/dashboardGuest.html";

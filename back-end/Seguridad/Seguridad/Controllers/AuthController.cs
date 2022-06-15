@@ -90,8 +90,8 @@ namespace Seguridad.Controllers
         {            
             List<Claim> claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.Role, userRole.Name)
+                new Claim("Name", user.Username),
+                new Claim("Role", userRole.Name)
             };
 
             var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(
