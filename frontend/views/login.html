@@ -30,39 +30,34 @@
       <div class="white-panel">
         <div class="login-show">
           <h2>LOGIN</h2>
-          <input
-            type="text"
-            id="email"
-            placeholder="Email"
-            value="mica@mail.com"
-          />
+          <input type="text" id="email" placeholder="Email" value="" />
           <input
             type="password"
             id="password"
             placeholder="Password"
-            value="Test1234$m"
+            value=""
           />
-          <input type="button" value="Login" onclick="login()" />
+          <input
+            type="button"
+            value="Ver Contraseña"
+            onclick="mostrarContrasena()"
+          />
+          <input type="button" value="Login" onclick="login()" style="margin-top: 150px;" />
         </div>
         <div class="register-show">
           <h2>REGISTRO</h2>
-          <input
-            type="text"
-            id="emailRegister"
-            placeholder="Email"
-            value="eve.holt@reqres.in"
-          />
+          <input type="text" id="emailRegister" placeholder="Email" value="" />
           <input
             type="password"
             id="passwordRegister"
             placeholder="Password"
-            value="pistol"
+            value=""
           />
           <input
             type="password"
             id="passwordRegisterRepeat"
-            placeholder="Confirm Password"
-            value="pistol"
+            placeholder="Confirmar Password"
+            value=""
           />
           <input type="button" value="Registrarme" onclick="register()" />
         </div>

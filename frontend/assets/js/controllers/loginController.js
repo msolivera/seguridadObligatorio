@@ -28,7 +28,7 @@ const stringTemplates = {
   emailInvalido: "El email no es valido",
   connectionError: "Error de conexión",
   registroCorrecto: "Usuario registrado correctamente",
-  registroError: "Error al registrar usuario",
+  registroError: "Error al registrar usuario, intente de nuevo mas tarde",
   captchaError: "Resuelve el captcha",
   passwordIncorrecta: `La contraseña debe tener mínimo 8 caracteres y estar compuesta por combinaciones de al menos una letra minúscula ("a-z"), mayúscula ("A-Z"), número ("0-9") y al menos un caracter especial`,
   passwordNoCoinciden: "Las contraseñas no coinciden",
@@ -48,8 +48,8 @@ function login() {
   if (camposVacios) {
     alert(stringTemplates.camposObligatorios);
   } else {
-    if (passwordSegura) {
-      if (emailOk) {
+    if (emailOk) {
+      if (passwordSegura) {
         var data = {
           username: email,
           password: password,
@@ -67,18 +67,21 @@ function login() {
               redireccionarUsuario(tokenInfo.Role);
             },
             404: function () {
-              console.log(stringTemplates.connectionError);
+               alert(stringTemplates.connectionError);
             },
             400: function () {
-              console.log(stringTemplates.errorIniciarSesion);
+               alert(stringTemplates.errorIniciarSesion);
+            },
+            500: function () {
+               alert(stringTemplates.errorIniciarSesion);
             },
           },
         });
       } else {
-        alert(stringTemplates.emailInvalido);
+        alert(stringTemplates.passwordIncorrecta);
       }
     } else {
-      alert(stringTemplates.passwordIncorrecta);
+      alert(stringTemplates.emailInvalido);
     }
   }
 }
@@ -91,7 +94,7 @@ function register() {
     "passwordRegisterRepeat"
   ).value;
 
-  let passwordOk = compararPassword(passwordRegister, passwordRegisterRepeat);
+  let passwordNoRepetidas = compararPassword(passwordRegister, passwordRegisterRepeat);
   let camposVacios = validarCamposVacios(email, passwordRegister);
   let emailOk = validarEmail(email);
   let passwordSegura = validarPassword(passwordRegister);
@@ -101,7 +104,7 @@ function register() {
   } else {
     if (emailOk) {
       if (passwordSegura) {
-        if (passwordOk) {
+        if (passwordNoRepetidas) {
           var data = {
             username: email,
             password: passwordRegister,
@@ -191,12 +194,20 @@ function parsearJwt(token) {
 
 //funcion que redirecciona al usuario segun su rol
 function redireccionarUsuario(role) {
-  debugger;
   if (role == "Administrador") {
     window.location = "Admin/dashboardAdmin.html";
   } else if (role == "Usuario") {
     window.location = "User/dashboardUser.html";
   } else {
     window.location = "Guest/dashboardGuest.html";
+  }
+}
+
+function mostrarContrasena(){
+  var tipo = document.getElementById("password");
+  if(tipo.type == "password"){
+      tipo.type = "text";
+  }else{
+      tipo.type = "password";
   }
 }
