@@ -98,7 +98,7 @@ namespace Seguridad.Controllers
             //Se verifica la contraseña
             if (!VerifyPasswordHash(request.Password, securityUser.PasswordHash, securityUser.PasswordSalt)) 
             {
-                return BadRequest("Wrong password.");
+                return LockedPassword(request.Username).Result;               
             }
             //Se obtiene el rol del usuario.
             Role userRole = _context.Role.Where(u => u.Id == securityUser.RoleId).FirstOrDefault();
@@ -153,6 +153,50 @@ namespace Seguridad.Controllers
         {
             var userPassRegex = new Regex(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!%*?&])([A-Za-z\d$@$!%*?&]|[^ ]){8,20}$");
             return userPassRegex.IsMatch(password);            
+        }
+        private async Task<ActionResult<string>> LockedPassword (string username)
+        {            
+            List<LoginLockout> systemUsers = await _context.LoginLockout.ToListAsync();
+            List<LoginLockout> selectedUser = new List<LoginLockout>();
+            foreach (LoginLockout user in systemUsers)
+            {
+                if (user.Username == username)
+                {
+                    selectedUser.Add(user);
+                }
+            }
+            List<LoginLockout> users = selectedUser.OrderBy(o => o.ExpirationTime).ToList();
+            int totalUsers = users.Count;
+            if (totalUsers < 3)
+            {
+                LoginLockout user = new LoginLockout();
+                user.Id = Guid.NewGuid().ToString();
+                user.Username = username;
+                user.ExpirationTime = DateTime.Now.AddMinutes(1);                
+                _context.LoginLockout.Add(user);
+                await _context.SaveChangesAsync();
+                return BadRequest("Wrong password.");
+            }
+            else
+            {
+                DateTime actualTime = DateTime.Now;
+                DateTime deadLine = (DateTime)users[2].ExpirationTime;
+                if (actualTime > deadLine)
+                {
+                    foreach (LoginLockout user in users)
+                    {
+                        _context.LoginLockout.Remove(user);
+                        await _context.SaveChangesAsync();
+                    }
+                    return BadRequest("Wrong password.");
+                }
+                else
+                {
+                    //Se envía un Bad Request diciendo que la cuenta se encuentra bloqueada por x tiempo.
+                    string remainingTime = Math.Round(((deadLine - actualTime).TotalMinutes),2).ToString();
+                    return BadRequest("Password locked for: " + remainingTime + " minutes.");
+                }
+            }
         }
     }
 }

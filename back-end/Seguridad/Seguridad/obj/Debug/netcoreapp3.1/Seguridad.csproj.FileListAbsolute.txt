@@ -118,7 +118,6 @@ C:\SeguridadObligatorio\back-end\Seguridad\Seguridad\bin\Debug\netcoreapp3.1\run
 C:\SeguridadObligatorio\back-end\Seguridad\Seguridad\bin\Debug\netcoreapp3.1\runtimes\unix\lib\netcoreapp2.0\System.Runtime.Caching.dll
 C:\SeguridadObligatorio\back-end\Seguridad\Seguridad\bin\Debug\netcoreapp3.1\runtimes\win\lib\netcoreapp2.0\System.Runtime.Caching.dll
 C:\SeguridadObligatorio\back-end\Seguridad\Seguridad\bin\Debug\netcoreapp3.1\runtimes\win\lib\netstandard2.0\System.Security.Cryptography.ProtectedData.dll
-C:\SeguridadObligatorio\back-end\Seguridad\Seguridad\obj\Debug\netcoreapp3.1\Seguridad.csproj.AssemblyReference.cache
 C:\SeguridadObligatorio\back-end\Seguridad\Seguridad\obj\Debug\netcoreapp3.1\Seguridad.GeneratedMSBuildEditorConfig.editorconfig
 C:\SeguridadObligatorio\back-end\Seguridad\Seguridad\obj\Debug\netcoreapp3.1\Seguridad.AssemblyInfoInputs.cache
 C:\SeguridadObligatorio\back-end\Seguridad\Seguridad\obj\Debug\netcoreapp3.1\Seguridad.AssemblyInfo.cs
@@ -265,3 +264,4 @@ D:\UCU\Seguridad\Obligatorio\Segundo Obligatorio\seguridadObligatorio\back-end\S
 D:\UCU\Seguridad\Obligatorio\Segundo Obligatorio\seguridadObligatorio\back-end\Seguridad\Seguridad\obj\Debug\netcoreapp3.1\Seguridad.dll
 D:\UCU\Seguridad\Obligatorio\Segundo Obligatorio\seguridadObligatorio\back-end\Seguridad\Seguridad\obj\Debug\netcoreapp3.1\Seguridad.pdb
 D:\UCU\Seguridad\Obligatorio\Segundo Obligatorio\seguridadObligatorio\back-end\Seguridad\Seguridad\obj\Debug\netcoreapp3.1\Seguridad.genruntimeconfig.cache
+C:\SeguridadObligatorio\back-end\Seguridad\Seguridad\obj\Debug\netcoreapp3.1\Seguridad.csproj.AssemblyReference.cache

@@ -19,5 +19,7 @@ namespace Seguridad.Data
         public DbSet<Seguridad.Models.SecurityUser> SecurityUser { get; set; }
 
         public DbSet<Seguridad.Models.Role> Role { get; set; }
+
+        public DbSet<Seguridad.Models.LoginLockout> LoginLockout { get; set; }
     }
 }

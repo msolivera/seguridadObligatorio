@@ -26,12 +26,23 @@ namespace Seguridad.Controllers
         public async Task<ActionResult<IEnumerable<User>>> GetUser()
         {
             string mail = "usuario@mail.com";
-            List<User> users = await _context.User.ToListAsync();            
+            List<User> systemUsers = await _context.User.ToListAsync();
+            List<User> selectedUser = new List<User>();
+            foreach(User user in systemUsers)
+            {
+                if(user.Mail == mail)
+                {
+                    selectedUser.Add(user);
+                }
+            }
+            List<User> users = selectedUser.OrderBy(o => o.JwtCreationTime).ToList();
             int totalUsers = users.Count;            
             if (totalUsers < 3)
             {
                 User user = new User();
-                user.Id = 12345;
+                //user.Id = Guid.NewGuid().ToString();
+                Random rnd = new Random();
+                user.Id = rnd.Next(1,1000);
                 user.Mail = "usuario@mail.com";
                 user.Password = "Test1234";
                 user.JwtCreationTime = DateTime.Now.AddMinutes(1);
@@ -39,19 +50,27 @@ namespace Seguridad.Controllers
                 user.Salt = "1234";
                 _context.User.Add(user);
                 await _context.SaveChangesAsync();
+
+                //Se avisa que la contraseña es incorrecta
             }
             else
             {
-                foreach (User userInList in users)
+                DateTime ahora = DateTime.Now;
+                DateTime deadLine = (DateTime)users[2].JwtCreationTime;
+                if (ahora > deadLine)
                 {
-                    DateTime ahora = DateTime.Now;
-                    if (ahora > userInList.JwtCreationTime)
-                    {
-                        _context.User.Remove(userInList);
+                    foreach (User user in users)
+                    {                        
+                        _context.User.Remove(user);
                         await _context.SaveChangesAsync();
                     }
-                    
+                    //Luego se intenta un login
                 }
+                else
+                {
+                    //Se envía un Bad Request diciendo que la cuenta se encuentra bloqueada por x tiempo.
+                    string remainingTime = (deadLine - ahora).TotalMinutes.ToString();
+                }                
             }
             return await _context.User.ToListAsync();
         }
