@@ -1,6 +1,7 @@
 $(document).ready(function () {
   $(".login-info-box").fadeOut();
   $(".login-show").addClass("show-log-panel");
+  localStorage.clear();
 });
 
 //comportamiento del template de login
@@ -28,11 +29,10 @@ const stringTemplates = {
   connectionError: "Error de conexión",
   registroCorrecto: "Usuario registrado correctamente",
   registroError: "Error al registrar usuario, intente de nuevo mas tarde",
-  captchaError: "Resuelve el captcha",
+  usuarioBloqueado: "Demasiados intentos fallidos, vuelva intentarlo en un minuto",
   passwordIncorrecta: `La contraseña debe tener mínimo 8 caracteres y estar compuesta por combinaciones de al menos una letra minúscula ("a-z"), mayúscula ("A-Z"), número ("0-9") y al menos un caracter especial`,
   passwordNoCoinciden: "Las contraseñas no coinciden",
   errorIniciarSesion: "Error al iniciar sesión",
-  passwordDiferentes: "Contraseña actual y nueva deben ser diferentes",
 };
 
 //funcion de login
@@ -65,11 +65,14 @@ function login() {
               localStorage.setItem("token", response.responseText);
               redireccionarUsuario(tokenInfo.Role);
             },
+            400: function () {
+              alert(stringTemplates.errorIniciarSesion);
+           },
             404: function () {
                alert(stringTemplates.connectionError);
             },
-            400: function () {
-               alert(stringTemplates.errorIniciarSesion);
+            405: function () {
+               alert(stringTemplates.usuarioBloqueado);
             },
             500: function () {
                alert(stringTemplates.errorIniciarSesion);
@@ -115,7 +118,7 @@ function register() {
             data: JSON.stringify(data),
             dataType: "json",
             statusCode: {
-              200: function (response) {
+              200: function () {
                 alert(stringTemplates.registroCorrecto);
                 window.location = "login.html";
               },
@@ -126,6 +129,7 @@ function register() {
                 alert(stringTemplates.registroError);
               },
             },
+            
           });
         } else {
           alert(stringTemplates.passwordNoCoinciden);
@@ -202,6 +206,7 @@ function redireccionarUsuario(role) {
   }
 }
 
+//funcion que muestra contraseña escrita por el usuario en el formulario
 function mostrarContrasena(){
   var tipo = document.getElementById("password");
   if(tipo.type == "password"){

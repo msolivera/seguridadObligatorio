@@ -1,12 +1,14 @@
-//funcion para reestablecer contraseña
-//recibe contraseña actual y nueva contraseña
-
-
-
 $(document).ready(function () {
   controlTokenExpirado();
 });
 
+const stringTemplates = {
+  camposObligatorios: "Todos los campos son obligatorios",
+  passwordIncorrecta: `La contraseña debe tener mínimo 8 caracteres y estar compuesta por combinaciones de al menos una letra minúscula ("a-z"), mayúscula ("A-Z"), número ("0-9") y al menos un caracter especial`,
+  passwordDiferentes: "Contraseña actual y nueva deben ser diferentes",
+};
+
+//funcion que controla si el token expiro
 function controlTokenExpirado() {
   var token = localStorage.getItem("token");
   if (token) {
@@ -14,22 +16,22 @@ function controlTokenExpirado() {
     var exp = tokenInfo.exp;
     var now = new Date().getTime() / 1000;
     if (exp < now) {
-      alert("Su sesión ha expirado");
       localStorage.clear();
       window.location = "../login.html";
     }
   } else {
-    alert("No tiene permisos para acceder a esta página");
-    window.location = "../login.html";
     localStorage.clear();
+    window.location = "../login.html";
   }
 }
 
+//funcion para cerrar sesion
 function cerrarSesion() {
   localStorage.clear();
-  window.location = "../login.html"; 
+  window.location = "../login.html";
 }
 
+//funcion para parsear el JWT
 function parsearJwt(token) {
   var base64Url = token.split(".")[1];
   var base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
@@ -45,12 +47,11 @@ function parsearJwt(token) {
   return JSON.parse(jsonPayload);
 }
 
-
 //funcion que redirecciona al usuario segun su rol
 function redireccionarUsuario() {
   var token = localStorage.getItem("token");
   var tokenInfo = parsearJwt(token);
-if (tokenInfo.Role == "Administrador") {
+  if (tokenInfo.Role == "Administrador") {
     window.location = "../Admin/dashboardAdmin.html";
   } else if (tokenInfo.Role == "Usuario") {
     window.location = "../User/dashboardUser.html";
@@ -65,7 +66,13 @@ function resetPassword() {
   var confrimarPassword = document.getElementById("confirmarPassword").value;
 
   let passwordActualOk = validarPassword(passwordActual);
-  let passwordNuevaOk = validarPasswordNueva(passwordNueva, confrimarPassword);
+  let passwordNuevaOk = validarPassword(passwordNueva);
+  let confrimarPasswordOk = validarPassword(confrimarPassword);
+  let controlPasswordNueva = controlarPasswordNueva(
+    passwordNueva,
+    confrimarPassword
+  );
+
   let camposVacios = validarCamposVacios(
     passwordActual,
     passwordNueva,
@@ -73,38 +80,52 @@ function resetPassword() {
   );
 
   if (camposVacios) {
-    alert("Todos los campos son obligatorios");
+    alert(stringTemplates.camposObligatorios);
   } else {
-    if (passwordNuevaOk) {
-      var data = {
-        passwordActual: passwordActual,
-        passwordNueva: passwordNueva,
-      };
-      //como manejar el error y el success
-
-      $.ajax({
-        type: "PUT",
-        url: "#",
-        data: data,
-        success: function (response) {
-          console.log(response);
-        },
-      });
+    if (passwordActualOk && passwordNuevaOk && confrimarPasswordOk) {
+      if (controlPasswordNueva) {
+        var data = {
+          passwordActual: passwordActual,
+          passwordNueva: passwordNueva,
+        };
+        $.ajax({
+          type: "PUT",
+          url: "https://localhost:44347/api/Auth/reset",
+          headers: {"Authorization": localStorage.getItem('token')},
+          data: data,
+        });
+      } else {
+        alert(stringTemplates.passwordDiferentes);
+      }
     } else {
-      alert("Las contraseñas no coinciden");
+      alert(stringTemplates.passwordIncorrecta);
     }
   }
 
+  //funcion validar password de forma general
   function validarPassword(password) {
-    //aca tengo que llamar a la base de datos y preguntar si la password que tiene el usuario coincide con la que escribio
+    var regex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!%*?&])([A-Za-z\d$@$!%*?&]|[^ ]){8,20}$/;
+    if (!regex.test(password)) {
+      return false;
+    }
+    return true;
   }
-  function validarPasswordNueva(passwordNueva, confrimarPassword) {
+
+  //funcion que compara las contraseñas nueva y actual, que sean diferentes
+  function controlarPasswordNueva(passwordNueva, confrimarPassword) {
     if (passwordNueva != confrimarPassword) {
       return false;
     }
     return true;
   }
-  function validarCamposVacios(passwordActual, passwordNueva, confrimarPassword) {
+
+  //funcion que valida que los campos no esten vacios
+  function validarCamposVacios(
+    passwordActual,
+    passwordNueva,
+    confrimarPassword
+  ) {
     if (
       passwordActual == "" ||
       passwordNueva == "" ||
@@ -113,5 +134,15 @@ function resetPassword() {
       return true;
     }
     return false;
+  }
+}
+
+//funcion que muestra contraseña escrita por el usuario en el formulario
+function mostrarContrasena(idElemento){
+  var tipo = document.getElementById(idElemento);
+  if(tipo.type == "password"){
+      tipo.type = "text";
+  }else{
+      tipo.type = "password";
   }
 }
