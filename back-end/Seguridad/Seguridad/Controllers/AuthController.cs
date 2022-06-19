@@ -49,15 +49,15 @@ namespace Seguridad.Controllers
             SecurityUser securityUser = _context.SecurityUser.Where(u => u.Username == request.Username).FirstOrDefault();
             //Si existe se rechaza.
             if (securityUser != null)
-            {                
+            {
                 return BadRequest("User already exists.");
             }
             else
-            { 
+            {
                 //Si no existe se crea.
                 securityUser = new SecurityUser();
                 securityUser.Id = Guid.NewGuid().ToString();
-                securityUser.Username = request.Username;                
+                securityUser.Username = request.Username;
                 securityUser.PasswordHash = passwordHash;
                 securityUser.PasswordSalt = passwordSalt;
                 //Por defecto siempre se crea en el rol de invitado.
@@ -68,11 +68,11 @@ namespace Seguridad.Controllers
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateException)
-                {                    
+                {
                     throw;
                 }
                 return Ok(securityUser);
-            }            
+            }
         }
 
         [HttpPost("login")]
@@ -88,6 +88,12 @@ namespace Seguridad.Controllers
             {
                 return BadRequest("Invalid Password format.");
             }
+            //Se verifica que el usuario no esté bloqueado
+            string verifyLockedPassword = VerifiyLockedPassword(request.Username);
+            if (verifyLockedPassword != null)
+            {
+                return BadRequest(verifyLockedPassword);
+            }
             //Se busca el usuario en la Base de Datos.
             SecurityUser securityUser = _context.SecurityUser.Where(u => u.Username == request.Username).FirstOrDefault();
             //Se verifica existencia de usuario.
@@ -96,9 +102,9 @@ namespace Seguridad.Controllers
                 return BadRequest("User not found.");
             }
             //Se verifica la contraseña
-            if (!VerifyPasswordHash(request.Password, securityUser.PasswordHash, securityUser.PasswordSalt)) 
+            if (!VerifyPasswordHash(request.Password, securityUser.PasswordHash, securityUser.PasswordSalt))
             {
-                return LockedPassword(request.Username).Result;               
+                return LockPassword(request.Username).Result;
             }
             //Se obtiene el rol del usuario.
             Role userRole = _context.Role.Where(u => u.Id == securityUser.RoleId).FirstOrDefault();
@@ -111,8 +117,8 @@ namespace Seguridad.Controllers
             return Ok(token);
         }
 
-        private string CreateToken (SecurityUser user, Role userRole)
-        {            
+        private string CreateToken(SecurityUser user, Role userRole)
+        {
             List<Claim> claims = new List<Claim>
             {
                 new Claim("Name", user.Username),
@@ -125,12 +131,12 @@ namespace Seguridad.Controllers
                 claims: claims,
                 expires: DateTime.Now.AddDays(1),
                 signingCredentials: creds);
-            var jwt = new JwtSecurityTokenHandler().WriteToken(token);            
+            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
             return jwt;
         }
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
-            using (var hmac = new HMACSHA512()) 
+            using (var hmac = new HMACSHA512())
             {
                 passwordSalt = hmac.Key;
                 passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
@@ -144,59 +150,104 @@ namespace Seguridad.Controllers
                 return computedHash.SequenceEqual(passwordHash);
             }
         }
-        private bool ValidateUserName (string username)
-        {            
+        private bool ValidateUserName(string username)
+        {
             var userNameRegex = new Regex(@"^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$");
-            return userNameRegex.IsMatch(username);           
+            return userNameRegex.IsMatch(username);
         }
         private bool ValidateUserPassword(string password)
         {
             var userPassRegex = new Regex(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!%*?&])([A-Za-z\d$@$!%*?&]|[^ ]){8,20}$");
-            return userPassRegex.IsMatch(password);            
+            return userPassRegex.IsMatch(password);
         }
-        private async Task<ActionResult<string>> LockedPassword (string username)
-        {            
-            List<LoginLockout> systemUsers = await _context.LoginLockout.ToListAsync();
-            List<LoginLockout> selectedUser = new List<LoginLockout>();
-            foreach (LoginLockout user in systemUsers)
+        private string VerifiyLockedPassword(string username)
+        {
+            string result = null;
+            DateTime actualTime = DateTime.Now;            
+            List<LoginLockout> selectedAttempts = PreviousAttempts(username);
+            int totalAttempts = selectedAttempts.Count;
+            if (totalAttempts >= 3)
             {
-                if (user.Username == username)
+                DateTime deadLine = (DateTime)selectedAttempts[2].ExpirationTime;
+                if (actualTime > deadLine)
                 {
-                    selectedUser.Add(user);
+                    return result;
                 }
+                else
+                {
+                    //Se envía un Bad Request diciendo que la cuenta se encuentra bloqueada por x tiempo.
+                    string remainingTime = Math.Round(((deadLine - actualTime).TotalMinutes), 2).ToString();
+                    result = remainingTime;
+                    return result;
+                }                    
             }
-            List<LoginLockout> users = selectedUser.OrderBy(o => o.ExpirationTime).ToList();
-            int totalUsers = users.Count;
-            if (totalUsers < 3)
+            else
             {
-                LoginLockout user = new LoginLockout();
-                user.Id = Guid.NewGuid().ToString();
-                user.Username = username;
-                user.ExpirationTime = DateTime.Now.AddMinutes(1);                
-                _context.LoginLockout.Add(user);
+                return result;
+            }
+        }
+        private async Task<ActionResult<string>> LockPassword(string username)
+        {
+            DateTime actualTime = DateTime.Now;
+            List<LoginLockout> previousAttempts = await _context.LoginLockout.Where(u => u.Username == username).ToListAsync();
+            List<LoginLockout> validAttempts = new List<LoginLockout>();
+            foreach (LoginLockout attempt in previousAttempts)
+            {
+                DateTime deadLine = (DateTime)attempt.ExpirationTime;
+                if (actualTime > deadLine)
+                {
+                    _context.LoginLockout.Remove(attempt);
+                    await _context.SaveChangesAsync();
+                }
+                else
+                {
+                    validAttempts.Add(attempt);
+                }
+
+            }
+            List<LoginLockout> selectedAttempts = validAttempts.OrderBy(o => o.ExpirationTime).ToList();
+            int totalAttempts = selectedAttempts.Count;
+            if (totalAttempts < 3)
+            {
+                LoginLockout attempt = new LoginLockout();
+                attempt.Id = Guid.NewGuid().ToString();
+                attempt.Username = username;
+                attempt.ExpirationTime = DateTime.Now.AddMinutes(1);
+                _context.LoginLockout.Add(attempt);
                 await _context.SaveChangesAsync();
                 return BadRequest("Wrong password.");
             }
             else
             {
-                DateTime actualTime = DateTime.Now;
-                DateTime deadLine = (DateTime)users[2].ExpirationTime;
+                DateTime deadLine = (DateTime)selectedAttempts[2].ExpirationTime;
                 if (actualTime > deadLine)
                 {
-                    foreach (LoginLockout user in users)
+                    foreach (LoginLockout attempt in selectedAttempts)
                     {
-                        _context.LoginLockout.Remove(user);
+                        _context.LoginLockout.Remove(attempt);
                         await _context.SaveChangesAsync();
                     }
-                    return BadRequest("Wrong password.");
+                    return BadRequest("Unlocked password, try again.");
                 }
                 else
                 {
                     //Se envía un Bad Request diciendo que la cuenta se encuentra bloqueada por x tiempo.
-                    string remainingTime = Math.Round(((deadLine - actualTime).TotalMinutes),2).ToString();
+                    string remainingTime = Math.Round(((deadLine - actualTime).TotalMinutes), 2).ToString();
                     return BadRequest("Password locked for: " + remainingTime + " minutes.");
                 }
             }
+        }
+        private List<LoginLockout> PreviousAttempts(string username)
+        {
+            DateTime actualTime = DateTime.Now;
+            var previousAttempts = _context.LoginLockout.Where(u => u.Username == username);
+            List<LoginLockout> validAttempts = new List<LoginLockout>();
+            foreach (LoginLockout attempt in previousAttempts)
+            {               
+                validAttempts.Add(attempt);                
+            }
+            List<LoginLockout> selectedAttempts = validAttempts.OrderBy(o => o.ExpirationTime).ToList();
+            return selectedAttempts;
         }
     }
 }
