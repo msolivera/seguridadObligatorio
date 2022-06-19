@@ -7,17 +7,13 @@ function controlarUsuarioLogeado() {
   var token = localStorage.getItem("token");
   if (token) {
     var tokenInfo = parsearJwt(token);
-    var rol = tokenInfo.rol;
-    console.log(rol);
+    var rol = tokenInfo.Role;
     if (rol != "Administrador") {
-      alert("No tiene permisos para acceder a esta página");
       localStorage.clear();
-      window.location = "../login.html";
-      
+      window.location = "../Security/errorPage.html";
     }
   } else {
-    alert("No tiene permisos para acceder a esta página");
-    window.location = "../login.html";
     localStorage.clear();
+    window.location = "../Security/errorPage.html";
   }
 }

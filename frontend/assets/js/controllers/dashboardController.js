@@ -14,8 +14,7 @@ function controlTokenExpirado() {
       window.location = "../login.html";
     }
   } else {
-    alert("No tiene permisos para acceder a esta página");
-    window.location = "../login.html";
+    window.location = "../Security/errorPage.html";
     localStorage.clear();
   }
 }

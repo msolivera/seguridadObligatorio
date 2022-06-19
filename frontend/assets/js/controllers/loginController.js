@@ -8,7 +8,6 @@ $('.login-reg-panel input[type="radio"]').on("change", function () {
   if ($("#log-login-show").is(":checked")) {
     $(".register-info-box").fadeOut();
     $(".login-info-box").fadeIn();
-
     $(".white-panel").addClass("right-log");
     $(".register-show").addClass("show-log-panel");
     $(".login-show").removeClass("show-log-panel");
@@ -211,3 +210,4 @@ function mostrarContrasena(){
       tipo.type = "password";
   }
 }
+
