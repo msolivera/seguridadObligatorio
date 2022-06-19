@@ -117,6 +117,76 @@ namespace Seguridad.Controllers
             return Ok(token);
         }
 
+        [HttpPost("reset")]
+        public async Task<ActionResult<string>> Reset(ResetPasswordDto request)
+        {
+            //Se valida el formato de contraseña.
+            if (!ValidateUserPassword(request.passwordActual))
+            {
+                return BadRequest("Invalid Password format.");
+            }
+            //Se valida el formato de la nueva contraseña.            
+            if (!ValidateUserPassword(request.passwordNueva))
+            {
+                return BadRequest("Invalid Password format.");
+            }
+
+            //Se obtiene el token enviado por el cliente.
+            string token = Request.Headers["Authorization"];
+            if (token == null)
+            {
+                return BadRequest("Token not found.");
+            }
+            
+            //Del token se obtiene el usuario.            
+            var jwt = new JwtSecurityTokenHandler().ReadJwtToken(token);
+            List<Claim> claims = jwt.Claims.ToList();
+            Claim user = claims[0];
+            string userName = user.Value;
+            //Se verifica que el usuario no esté bloqueado
+            string verifyLockedPassword = VerifiyLockedPassword(userName);
+            if (verifyLockedPassword != null)
+            {
+                return StatusCode(405, verifyLockedPassword);
+            }            
+            //Se busca el usuario en la Base de Datos.
+            SecurityUser securityUser = _context.SecurityUser.Where(u => u.Username == userName).FirstOrDefault();
+            //Se verifica existencia de usuario.
+            if (securityUser == null)
+            {
+                return BadRequest("User not found.");
+            }
+            //Se verifica la contraseña actual.
+            if (!VerifyPasswordHash(request.passwordActual, securityUser.PasswordHash, securityUser.PasswordSalt))
+            {
+                return BadRequest("Invalid password.");
+            }
+            //Se obtiene el rol del usuario.
+            Role userRole = _context.Role.Where(u => u.Id == securityUser.RoleId).FirstOrDefault();
+            if (userRole == null)
+            {
+                return BadRequest("The user does not have a role.");
+            }
+            //Se cambia la contraseña.
+            //Se crea el PasswordHash para la nueva contraseña
+            CreatePasswordHash(request.passwordNueva, out byte[] passwordHash, out byte[] passwordSalt);
+            //Actualizo el SecurityUser
+            securityUser.PasswordHash = passwordHash;
+            securityUser.PasswordSalt = passwordSalt;
+            _context.SecurityUser.Update(securityUser);
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                throw;
+            }            
+            //Creo el JWT
+            string newToken = CreateToken(securityUser, userRole);
+            return Ok(newToken);
+        }
+
         private string CreateToken(SecurityUser user, Role userRole)
         {
             List<Claim> claims = new List<Claim>
