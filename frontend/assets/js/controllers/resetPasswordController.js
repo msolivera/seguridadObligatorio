@@ -91,8 +91,16 @@ function resetPassword() {
         $.ajax({
           type: "PUT",
           url: "https://localhost:44347/api/Auth/reset",
-          headers: {"Authorization": localStorage.getItem('token')},
+          contentType: "application/json",
+          data: JSON.stringify(data),
+          dataType: "json",
+          headers: { Authorization: localStorage.getItem("token") },
           data: data,
+          statusCode: {
+            200: function (response) {
+              console.log(response);
+            },
+          },
         });
       } else {
         alert(stringTemplates.passwordDiferentes);
@@ -138,11 +146,11 @@ function resetPassword() {
 }
 
 //funcion que muestra contraseña escrita por el usuario en el formulario
-function mostrarContrasena(idElemento){
+function mostrarContrasena(idElemento) {
   var tipo = document.getElementById(idElemento);
-  if(tipo.type == "password"){
-      tipo.type = "text";
-  }else{
-      tipo.type = "password";
+  if (tipo.type == "password") {
+    tipo.type = "text";
+  } else {
+    tipo.type = "password";
   }
 }
