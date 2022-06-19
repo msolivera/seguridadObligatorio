@@ -117,7 +117,7 @@ namespace Seguridad.Controllers
             return Ok(token);
         }
 
-        [HttpPost("reset")]
+        [HttpPut("reset")]
         public async Task<ActionResult<string>> Reset(ResetPasswordDto request)
         {
             //Se valida el formato de contraseña.
