@@ -91,8 +91,8 @@ namespace Seguridad.Controllers
             //Se verifica que el usuario no esté bloqueado
             string verifyLockedPassword = VerifiyLockedPassword(request.Username);
             if (verifyLockedPassword != null)
-            {
-                return BadRequest(verifyLockedPassword);
+            {                
+                return StatusCode(405, verifyLockedPassword);
             }
             //Se busca el usuario en la Base de Datos.
             SecurityUser securityUser = _context.SecurityUser.Where(u => u.Username == request.Username).FirstOrDefault();
