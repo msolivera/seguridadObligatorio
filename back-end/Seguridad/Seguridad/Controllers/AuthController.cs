@@ -132,7 +132,7 @@ namespace Seguridad.Controllers
             }
 
             //Se obtiene el token enviado por el cliente.
-            string token = Request.Headers["Authorization"];
+            string token = Request.Headers["authorization"];
             if (token == null)
             {
                 return BadRequest("Token not found.");
