@@ -11,6 +11,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Seguridad.Controllers
@@ -32,25 +33,35 @@ namespace Seguridad.Controllers
         [HttpPost("register")]
         public async Task<ActionResult<SecurityUser>> Register(UserDto request)
         {
+            //Se valida formato de correo en el Username.            
+            if (!ValidateUserName(request.Username))
+            {
+                return BadRequest("Invalid Username format.");
+            }
+            //Se valida formato de contraseña.            
+            if (!ValidateUserPassword(request.Password))
+            {
+                return BadRequest("Invalid Password format.");
+            }
+            //Se crea el PasswordHash
             CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
-
             //Verifico la existencia del usuario.
             SecurityUser securityUser = _context.SecurityUser.Where(u => u.Username == request.Username).FirstOrDefault();
-            //Si existe lo rechazo.
+            //Si existe se rechaza.
             if (securityUser != null)
             {                
                 return BadRequest("User already exists.");
             }
             else
             { 
-                //Si no existe lo creo.
+                //Si no existe se crea.
                 securityUser = new SecurityUser();
                 securityUser.Id = Guid.NewGuid().ToString();
                 securityUser.Username = request.Username;                
                 securityUser.PasswordHash = passwordHash;
                 securityUser.PasswordSalt = passwordSalt;
-                //Por defecto siempre se crea en el rol de usuario.
-                securityUser.RoleId = "6B4F3E3F-5C96-495B-A5EA-0C5289E7C0C4";
+                //Por defecto siempre se crea en el rol de invitado.
+                securityUser.RoleId = "918D46B1-5BCB-47DF-8F9B-A9B68740E730";
                 _context.SecurityUser.Add(securityUser);
                 try
                 {
@@ -67,10 +78,20 @@ namespace Seguridad.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<string>> Login(UserDto request)
         {
-            //Busco el usuario en la Base de Datos
+            //Se valida el formato de correo en el Username.            
+            if (!ValidateUserName(request.Username))
+            {
+                return BadRequest("Invalid Username format.");
+            }
+            //Se valida el formato de contraseña.            
+            if (!ValidateUserPassword(request.Password))
+            {
+                return BadRequest("Invalid Password format.");
+            }
+            //Se busca el usuario en la Base de Datos.
             SecurityUser securityUser = _context.SecurityUser.Where(u => u.Username == request.Username).FirstOrDefault();
-            //Se verifica la existencia
-            if (securityUser.Username != request.Username)
+            //Se verifica existencia de usuario.
+            if (securityUser == null)
             {
                 return BadRequest("User not found.");
             }
@@ -79,8 +100,12 @@ namespace Seguridad.Controllers
             {
                 return BadRequest("Wrong password.");
             }
-            //Obtengo el rol del usuario.
+            //Se obtiene el rol del usuario.
             Role userRole = _context.Role.Where(u => u.Id == securityUser.RoleId).FirstOrDefault();
+            if (userRole == null)
+            {
+                return BadRequest("The user does not have a role.");
+            }
             //Creo el JWT
             string token = CreateToken(securityUser, userRole);
             return Ok(token);
@@ -93,22 +118,16 @@ namespace Seguridad.Controllers
                 new Claim("Name", user.Username),
                 new Claim("Role", userRole.Name)
             };
-
             var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(
                 _configuration.GetSection("AppSettings:Token").Value));
-
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
-
             var token = new JwtSecurityToken(
                 claims: claims,
                 expires: DateTime.Now.AddDays(1),
                 signingCredentials: creds);
-
-            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
-            
+            var jwt = new JwtSecurityTokenHandler().WriteToken(token);            
             return jwt;
         }
-
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
             using (var hmac = new HMACSHA512()) 
@@ -117,7 +136,6 @@ namespace Seguridad.Controllers
                 passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
             }
         }
-
         private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
         {
             using (var hmac = new HMACSHA512(passwordSalt))
@@ -125,6 +143,16 @@ namespace Seguridad.Controllers
                 var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
                 return computedHash.SequenceEqual(passwordHash);
             }
+        }
+        private bool ValidateUserName (string username)
+        {            
+            var userNameRegex = new Regex(@"^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$");
+            return userNameRegex.IsMatch(username);           
+        }
+        private bool ValidateUserPassword(string password)
+        {
+            var userPassRegex = new Regex(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!%*?&])([A-Za-z\d$@$!%*?&]|[^ ]){8,20}$");
+            return userPassRegex.IsMatch(password);            
         }
     }
 }

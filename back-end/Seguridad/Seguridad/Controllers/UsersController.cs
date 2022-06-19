@@ -25,6 +25,34 @@ namespace Seguridad.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetUser()
         {
+            string mail = "usuario@mail.com";
+            List<User> users = await _context.User.ToListAsync();            
+            int totalUsers = users.Count;            
+            if (totalUsers < 3)
+            {
+                User user = new User();
+                user.Id = 12345;
+                user.Mail = "usuario@mail.com";
+                user.Password = "Test1234";
+                user.JwtCreationTime = DateTime.Now.AddMinutes(1);
+                user.JwtExpirationTime = null;
+                user.Salt = "1234";
+                _context.User.Add(user);
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                foreach (User userInList in users)
+                {
+                    DateTime ahora = DateTime.Now;
+                    if (ahora > userInList.JwtCreationTime)
+                    {
+                        _context.User.Remove(userInList);
+                        await _context.SaveChangesAsync();
+                    }
+                    
+                }
+            }
             return await _context.User.ToListAsync();
         }
 
