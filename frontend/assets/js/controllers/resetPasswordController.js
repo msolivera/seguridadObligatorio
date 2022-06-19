@@ -6,6 +6,8 @@ const stringTemplates = {
   camposObligatorios: "Todos los campos son obligatorios",
   passwordIncorrecta: `La contraseña debe tener mínimo 8 caracteres y estar compuesta por combinaciones de al menos una letra minúscula ("a-z"), mayúscula ("A-Z"), número ("0-9") y al menos un caracter especial`,
   passwordDiferentes: "Contraseña actual y nueva deben ser diferentes",
+  passwordActualIncorrecta: "La contraseña actual es incorrecta",
+  reseteoCorrecto: "Contraseña actualizada correctamente",
 };
 
 //funcion que controla si el token expiro
@@ -92,13 +94,18 @@ function resetPassword() {
           type: "PUT",
           url: "https://localhost:44347/api/Auth/reset",
           contentType: "application/json",
-          data: JSON.stringify(data),
           dataType: "json",
-          headers: { Authorization: localStorage.getItem("token") },
-          data: data,
+          data: JSON.stringify(data),
+          headers: { authorization: localStorage.getItem("token") },
           statusCode: {
-            200: function (response) {
-              console.log(response);
+            200: function () {
+              alert(stringTemplates.reseteoCorrecto);
+              window.location = "../login.html";
+              localStorage.clear();
+            },
+            400: function () {
+              alert(stringTemplates.passwordActualIncorrecta);
+              window.location.reload();
             },
           },
         });
@@ -113,7 +120,7 @@ function resetPassword() {
   //funcion validar password de forma general
   function validarPassword(password) {
     var regex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!%*?&])([A-Za-z\d$@$!%*?&]|[^ ]){8,20}$/;
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!%*?&])([A-Za-z\d$@$!%*?&]|[^ ]){8,}$/;
     if (!regex.test(password)) {
       return false;
     }
