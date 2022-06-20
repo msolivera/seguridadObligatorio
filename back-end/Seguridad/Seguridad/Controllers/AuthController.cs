@@ -167,6 +167,10 @@ namespace Seguridad.Controllers
             {
                 return BadRequest("The user does not have a role.");
             }
+            if (userRole.Id != "F4B8B62A-ABDC-424F-8D09-CAE0D00234E2")
+            {
+                return StatusCode(403, "Unauthorized Role");
+            }
             //Se cambia la contraseña.
             //Se crea el PasswordHash para la nueva contraseña
             CreatePasswordHash(request.passwordNueva, out byte[] passwordHash, out byte[] passwordSalt);
