@@ -8,6 +8,7 @@ const stringTemplates = {
   passwordDiferentes: "Contraseña actual y nueva deben ser diferentes",
   passwordActualIncorrecta: "La contraseña actual es incorrecta",
   reseteoCorrecto: "Contraseña actualizada correctamente",
+  rolInvalido: "Solo los Administradores tienen permisos para esta acción",
 };
 
 //funcion que controla si el token expiro
@@ -106,6 +107,11 @@ function resetPassword() {
             400: function () {
               alert(stringTemplates.passwordActualIncorrecta);
               window.location.reload();
+            },
+            403: function () {
+              alert(stringTemplates.rolInvalido);
+              window.location = "../Security/errorPage.html";
+              localStorage.clear();
             },
           },
         });

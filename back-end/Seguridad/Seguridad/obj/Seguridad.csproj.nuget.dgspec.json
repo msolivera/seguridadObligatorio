@@ -1,25 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\SeguridadObligatorio\\back-end\\Seguridad\\Seguridad\\Seguridad.csproj": {}
+    "D:\\UCU\\Seguridad\\Obligatorio\\Segundo Obligatorio\\seguridadObligatorio\\back-end\\Seguridad\\Seguridad\\Seguridad.csproj": {}
   },
   "projects": {
-    "C:\\SeguridadObligatorio\\back-end\\Seguridad\\Seguridad\\Seguridad.csproj": {
+    "D:\\UCU\\Seguridad\\Obligatorio\\Segundo Obligatorio\\seguridadObligatorio\\back-end\\Seguridad\\Seguridad\\Seguridad.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\SeguridadObligatorio\\back-end\\Seguridad\\Seguridad\\Seguridad.csproj",
+        "projectUniqueName": "D:\\UCU\\Seguridad\\Obligatorio\\Segundo Obligatorio\\seguridadObligatorio\\back-end\\Seguridad\\Seguridad\\Seguridad.csproj",
         "projectName": "Seguridad",
-        "projectPath": "C:\\SeguridadObligatorio\\back-end\\Seguridad\\Seguridad\\Seguridad.csproj",
-        "packagesPath": "C:\\Users\\danie\\.nuget\\packages\\",
-        "outputPath": "C:\\SeguridadObligatorio\\back-end\\Seguridad\\Seguridad\\obj\\",
+        "projectPath": "D:\\UCU\\Seguridad\\Obligatorio\\Segundo Obligatorio\\seguridadObligatorio\\back-end\\Seguridad\\Seguridad\\Seguridad.csproj",
+        "packagesPath": "C:\\Users\\Meki\\.nuget\\packages\\",
+        "outputPath": "D:\\UCU\\Seguridad\\Obligatorio\\Segundo Obligatorio\\seguridadObligatorio\\back-end\\Seguridad\\Seguridad\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",
-          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
-        ],
         "configFilePaths": [
-          "C:\\Users\\danie\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Users\\Meki\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -84,7 +79,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.408\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.300\\RuntimeIdentifierGraph.json"
         }
       }
     }

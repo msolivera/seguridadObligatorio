@@ -29,7 +29,7 @@ const stringTemplates = {
   connectionError: "Error de conexión",
   registroCorrecto: "Usuario registrado correctamente",
   registroError: "Error al registrar usuario, intente de nuevo mas tarde",
-  usuarioBloqueado: "Demasiados intentos fallidos, vuelva intentarlo en un minuto",
+  usuarioBloqueado: "Demasiados intentos fallidos, vuelva intentarlo en ",
   passwordIncorrecta: `La contraseña debe tener mínimo 8 caracteres y estar compuesta por combinaciones de al menos una letra minúscula ("a-z"), mayúscula ("A-Z"), número ("0-9") y al menos un caracter especial`,
   passwordNoCoinciden: "Las contraseñas no coinciden",
   errorIniciarSesion: "Error al iniciar sesión",
@@ -71,8 +71,9 @@ function login() {
             404: function () {
                alert(stringTemplates.connectionError);
             },
-            405: function () {
-               alert(stringTemplates.usuarioBloqueado);
+            405: function (response) {
+              var respuesta = (response.responseText);
+               alert(stringTemplates.usuarioBloqueado + respuesta + " segundos");
             },
             500: function () {
                alert(stringTemplates.errorIniciarSesion);
@@ -173,7 +174,7 @@ function validarCamposVacios(email, password) {
 //funcion validar password de forma general
 function validarPassword(password) {
   var regex =
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!%*?&])([A-Za-z\d$@$!%*?&]|[^ ]){8,20}$/;
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!%*?&])([A-Za-z\d$@$!%*?&]|[^ ]){8,}$/;
   if (!regex.test(password)) {
     return false;
   }
@@ -207,8 +208,8 @@ function redireccionarUsuario(role) {
 }
 
 //funcion que muestra contraseña escrita por el usuario en el formulario
-function mostrarContrasena(){
-  var tipo = document.getElementById("password");
+function mostrarContrasena(idElemento){
+  var tipo = document.getElementById(idElemento);
   if(tipo.type == "password"){
       tipo.type = "text";
   }else{
