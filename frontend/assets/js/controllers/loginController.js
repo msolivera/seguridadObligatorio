@@ -174,7 +174,7 @@ function validarCamposVacios(email, password) {
 //funcion validar password de forma general
 function validarPassword(password) {
   var regex =
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!%*?&])([A-Za-z\d$@$!%*?&]|[^ ]){8,}$/;
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!%*?#&])([A-Za-z\d$@$!%*?#&]|[^ ]){8,}$/;
   if (!regex.test(password)) {
     return false;
   }
